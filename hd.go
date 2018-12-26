@@ -85,13 +85,13 @@ func hex(bytes []byte) string {
 	return rc
 }
 
-func hd(path string, w io.Writer, seek int64, length int64) error {
+func hd(path string, w io.Writer, offset int64, length int64) error {
 	inf, err := os.Open(path)
 	if err != nil {
 		return err
 	}
 
-	if _, err := inf.Seek(seek, 0); err != nil {
+	if _, err := inf.Seek(offset, 0); err != nil {
 		return err
 	}
 
@@ -102,7 +102,7 @@ func hd(path string, w io.Writer, seek int64, length int64) error {
 		return inf
 	}()
 
-	count := seek
+	count := offset
 	for s := range read(in) {
 		fmt.Fprintf(w, "%08x %-50.50s  | %-16.16s |\n", count, hex(s), ascii(s))
 		count += int64(len(s))
