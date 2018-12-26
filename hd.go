@@ -15,8 +15,8 @@ func read(r io.Reader) <-chan []byte {
 	go func() {
 		// we'll read a multiple of a block size worth of data.  this value must
 		// also be divisible by our stride of 16 bytes per row.
-		bs := 4096
-		data := make([]byte, bs*4, bs*4)
+		bs := 4096 * 4 // 16k buffer should suffice.
+		data := make([]byte, bs, bs)
 		for {
 			bytes, err := r.Read(data)
 
@@ -108,7 +108,7 @@ func hd(path string, w io.Writer, offset int64, length int64) error {
 	}
 
 	for s := range read(reader()) {
-		fmt.Fprintf(w, "%08x %-50.50s  | %-16.16s |\n", offset, hex(s), ascii(s))
+		fmt.Fprintf(w, "%08x %-50.50s  |%-16.16s|\n", offset, hex(s), ascii(s))
 		offset += int64(len(s))
 	}
 
