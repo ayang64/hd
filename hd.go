@@ -68,8 +68,10 @@ func ascii(bytes []byte) string {
 
 // hex returns a hexadecimal string representation of a series of bytes.
 func hex(bytes []byte) string {
-	rc := ""
-	end := func(s []byte, i int) int {
+	sb := strings.Builder{}
+
+	// return number of spaces to print based on i's position in slice s
+	spaces := func(s []byte, i int) int {
 		if i == len(s)-1 {
 			return 0
 		}
@@ -80,35 +82,36 @@ func hex(bytes []byte) string {
 	}
 
 	for i, b := range bytes {
-		rc += fmt.Sprintf("%02x%*s", b, end(bytes, i), "")
+		sb.WriteString(fmt.Sprintf("%02x%*s", b, spaces(bytes, i), ""))
 	}
-	return rc
+	return sb.String()
 }
 
 func hd(path string, w io.Writer, offset int64, length int64) error {
-	inf, err := os.Open(path)
+	fh, err := os.Open(path)
 	if err != nil {
 		return err
 	}
+	defer fh.Close()
 
-	if _, err := inf.Seek(offset, 0); err != nil {
+	// TODO: seek uncondiontally.  maybe it would be worthwhile to check if offset is 0
+	// to save a system call.
+	if _, err := fh.Seek(offset, 0); err != nil {
 		return err
 	}
 
-	in := func() io.Reader {
+	reader := func() io.Reader {
 		if length != 0 {
-			return io.LimitReader(inf, length)
+			return io.LimitReader(fh, length)
 		}
-		return inf
-	}()
-
-	count := offset
-	for s := range read(in) {
-		fmt.Fprintf(w, "%08x %-50.50s  | %-16.16s |\n", count, hex(s), ascii(s))
-		count += int64(len(s))
+		return fh
 	}
 
-	inf.Close()
+	for s := range read(reader()) {
+		fmt.Fprintf(w, "%08x %-50.50s  | %-16.16s |\n", offset, hex(s), ascii(s))
+		offset += int64(len(s))
+	}
+
 	return nil
 }
 
