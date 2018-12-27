@@ -81,8 +81,8 @@ func hex(bytes []byte) string {
 		return 1
 	}
 
-	for i, b := range bytes {
-		sb.WriteString(fmt.Sprintf("%02x%*s", b, spaces(bytes, i), ""))
+	for i := range bytes {
+		sb.WriteString(fmt.Sprintf("%02x%*s", bytes[i], spaces(bytes, i), ""))
 	}
 	return sb.String()
 }
@@ -119,7 +119,7 @@ func main() {
 	seek := flag.Int("s", 0, "seek n bytes into file")
 	length := flag.Int("n", 0, "only read a limited number of bytes from input.")
 	flag.Parse()
-	for _, file := range os.Args[1:] {
+	for _, file := range flag.Args() {
 		hd(file, os.Stdout, int64(*seek), int64(*length))
 	}
 }
