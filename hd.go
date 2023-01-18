@@ -19,7 +19,6 @@ func read(r io.Reader) <-chan []byte {
 		data := make([]byte, bs, bs)
 		for {
 			bytes, err := r.Read(data)
-
 			if err != nil {
 				break
 			}
@@ -118,7 +117,14 @@ func main() {
 	seek := flag.Int("s", 0, "seek n bytes into file")
 	length := flag.Int("n", 0, "only read a limited number of bytes from input.")
 	flag.Parse()
-	for _, file := range flag.Args() {
+
+	args := flag.Args()
+
+	if len(args) == 0 {
+		args = []string{"/dev/stdin"}
+	}
+
+	for _, file := range args {
 		hd(file, os.Stdout, int64(*seek), int64(*length))
 	}
 }
