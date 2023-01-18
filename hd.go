@@ -68,8 +68,6 @@ func ascii(bytes []byte) string {
 
 // hex returns a hexadecimal string representation of a series of bytes.
 func hex(bytes []byte) string {
-	sb := strings.Builder{}
-
 	// return number of spaces to print based on i's position in slice s
 	spaces := func(s []byte, i int) int {
 		if i == len(s)-1 {
@@ -81,8 +79,9 @@ func hex(bytes []byte) string {
 		return 1
 	}
 
+	sb := strings.Builder{}
 	for i := range bytes {
-		sb.WriteString(fmt.Sprintf("%02x%*s", bytes[i], spaces(bytes, i), ""))
+		fmt.Fprintf(&sb, "%02x%*s", bytes[i], spaces(bytes, i), "")
 	}
 	return sb.String()
 }
